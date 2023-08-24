@@ -1,9 +1,10 @@
+import os
 import requests
 import asyncio
 from bs4 import BeautifulSoup
 from time import sleep
 
-async def download_image(src, dir, i):
+async def download_image(src, alt_text, dir, save_description=True):
     ErrorLevel = 0
     failed = False
     filename = src.split('/')[-1]
@@ -20,10 +21,18 @@ async def download_image(src, dir, i):
             if request.status_code != 200:
                 print(f"Download {src} fail!")
                 return True
-           
+
             with open(savedir, 'wb') as file:
                 file.write(request.content)
-            print(f"Download {src} done!")
+
+            print(f"Downloaded image {src}!")
+
+            if save_description:
+                text_filename = os.path.join(dir, filename.replace(".jpg", ".txt"))
+                with open(text_filename, 'w') as file:
+                    file.write(alt_text)
+                    print(f"Saved image description {text_filename}!")
+
             break
         except Exception as e:
             print(f"{src} : Download fail! Error: {e}")
@@ -36,9 +45,8 @@ async def download_image(src, dir, i):
     return failed
 
 
-async def download_image_host(plist, dir):
+async def download_image_host(plist, alt_list, dir, save_description=True):
     fail_image = 0
-    fts = [asyncio.ensure_future(download_image(plist[i], dir, i)) for i in range(0, len(plist))]
+    fts = [asyncio.ensure_future(download_image(plist[i], alt_list[i], dir, save_description)) for i in range(0, len(plist))]
     fail_image = await asyncio.gather(*fts)
     return fail_image
-
