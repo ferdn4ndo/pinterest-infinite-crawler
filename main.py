@@ -1,4 +1,3 @@
-from selenium import webdriver
 from pinterest import Pinterest
 from sys import exit
 from chromedriver import chromedriver_download
@@ -19,6 +18,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--directory', required=False, default="", help='Directory you want to download')
     parser.add_argument('-l', '--link', required=False, default="", help='Link of Pinterest which you want to scrape')
     parser.add_argument('-g', '--page', required=False, default="", help='Number of pages which you want to scrape')
+    parser.add_argument('-wd', '--with-descriptions', required=False, default=True, help='Enable downloading the descriptions too')
     parser.add_argument('-b', '--batch', required=False, default=False, action="store_true", help='Enable batch mode (Please read README.md!!)')
     args = parser.parse_args()
 
@@ -28,20 +28,20 @@ if __name__ == "__main__":
     link = args.link
     pages = args.page
     batch = args.batch
-    
+    fetch_descriptions = args.with_descriptions
+
     yaml_email = ""
     yaml_password = ""
     yaml_directory = ""
-    
 
     # Check chromedriver exists
-    if not os.path.isfile(currentdir + "/chromedriver.exe"):
+    if not os.path.exists(os.path.join(currentdir, "chromedriver")):
         print("No chromedriver found! I'll download it automatically..")
         chromedriver_download()
 
     # Check yaml exists
-    if os.path.isfile(currentdir + "/config.yaml"):
-        with open("./config.yaml", "r") as f:
+    if os.path.isfile(".config.yaml"):
+        with open(".config.yaml", "r") as f:
             config = yaml.load(f)
             yaml_email = config["email"]
             yaml_password = config["password"]
@@ -50,15 +50,15 @@ if __name__ == "__main__":
     if email == "":
         if yaml_email != "":
             email = yaml_email
-        else: 
+        else:
             email = input("Enter your email: ")
 
     if password == "":
         if yaml_password:
             password = yaml_password
-        else: 
+        else:
             password = input("Enter your password: ")
-    
+
     dir_list = []
     link_list = []
     if batch != False:
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         if directory == "":
             if yaml_directory:
                 directory = yaml_directory
-            else: 
+            else:
                 directory = input("Enter the directory to save the images (Blank if you set default): ")
         if directory == "":
             directory = "download"
@@ -91,19 +91,14 @@ if __name__ == "__main__":
     else:
         pages = int(pages)
 
-
-   
-
-    
-
     print("Open selenium...")
     p = Pinterest(email, password)
 
     if batch == False:
         print("Download Image")
-        p.single_download(pages, link, directory)
-    
+        p.single_download(pages, link, directory, fetch_descriptions)
+
     else:
         print("Download Image in Batch mode...")
-        p.batch_download(pages, link_list, dir_list)
+        p.batch_download(pages, link_list, dir_list, fetch_descriptions)
 

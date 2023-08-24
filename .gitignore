@@ -3,12 +3,16 @@ __pycache__/
 *.py[cod]
 *$py.class
 config.yaml
-chromedriver.exe
 /download
 cookies.pkl
 batch.json
 # C extensions
 *.so
+
+# Chromedriver
+chromedriver.exe
+chromedriver
+LICENSE.chromedriver
 
 # Distribution / packaging
 .Python
